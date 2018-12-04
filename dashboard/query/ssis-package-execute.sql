@@ -1,11 +1,15 @@
 Declare @execution_id bigint
+Declare @package_name nvarchar ?
+Declare @folder_name nvarchar ?
+Declare @project_name nvarchar ?
 
-EXEC [SSISDB].[catalog].[create_execution] @package_name=N'Package.dtsx',
+
+EXEC [SSISDB].[catalog].[create_execution] @package_name,
     @execution_id=@execution_id OUTPUT,
-    @folder_name=N'Deployed Projects',
-      @project_name=N'Integration Services Project1',
+    @folder_name=@folder_name,
+    @project_name=@project_name,
     @use32bitruntime=False,
-      @reference_id=Null
+    @reference_id=Null
 Select @execution_id
 
 DECLARE @var0 smallint = 1

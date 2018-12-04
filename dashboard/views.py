@@ -238,7 +238,8 @@ def list_packages():
 @app.route('/execute/<int:package>', methods=['POST'])
 def execute_package(package):
     parameter = request.form["parameter"]
-    return f'Package {package}, paramters: {parameter}' 
+    m = monitor()    
+    return f'Package {package}, paramters: {parameter}, result {m.get_ssis_package_metadata(package)}' 
 
 
 @app.errorhandler(404)
