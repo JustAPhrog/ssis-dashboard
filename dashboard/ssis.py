@@ -118,6 +118,12 @@ class monitor(object):
             r["logging_level_desc"] = self.logging_codes[r["logging_level"]].title()
 
         return result
+        
+    def get_ssis_packages_list(self):
+        return self.__execute_query(
+            'ssis-packages-list.sql',
+            False
+        )
     
     def get_package_info(self):
         result = self.__execute_query(

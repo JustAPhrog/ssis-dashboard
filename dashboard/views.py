@@ -4,6 +4,7 @@ import urllib.parse
 from flask import render_template
 from flask import make_response
 from flask import jsonify
+from flask import request
 from dashboard.ssis import monitor
 from dashboard import app
 
@@ -216,6 +217,29 @@ def package_history(folder_name, project_name, status, package_name):
 #@app.route('/sample', methods = ['GET'])
 #def get_sample():
 #    return jsonify({'result': 123})
+
+@app.route('/list/packages')
+def list_packages():
+    environment = {
+        'version': version,
+        'timestamp': datetime.now()        
+        }
+    m = monitor()
+    engine_info = m.get_engine_info()
+    ssispackages = m.get_ssis_packages_list()
+
+    return render_template(
+        'packages.html',
+        environment=environment,
+        engine_info=engine_info,
+        ssispackages=ssispackages
+    )
+
+@app.route('/execute/<int:package>', methods=['POST'])
+def execute_package(package):
+    parameter = request.form["parameter"]
+    return f'Package {package}, paramters: {parameter}' 
+
 
 @app.errorhandler(404)
 def not_found(error):
