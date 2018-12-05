@@ -1,4 +1,5 @@
 import pyodbc
+from string import Template
 from dashboard import app
 
 class configuration:
@@ -119,17 +120,30 @@ class monitor(object):
 
         return result
 
-    def get_ssis_packages_list(self):
-        return self.__execute_query(
-            'ssis-packages-list.sql',
-            False
+    def get_ssis_packages_list(self, folders=None):
+        where_clause = '\',\''.join(folders) if folders is not None  else None
+        where_clause = f' IN (\'{where_clause}\')' if folders is not None else 'LIKE \'%\''
+        return self.__execute_dynamic_query(
+            'ssis-packages-list.sql',            
+            False,
+            clause=where_clause
         )
 
     def get_ssis_package_metadata(self, package_id):
+        print(package_id)
         return self.__execute_query(
             'ssis-package-metadata.sql',
             False,
             package_id
+        )
+    
+    def execute_ssis_package(self, metadata):
+        return self.__execute_query(
+            'ssis-package-execute.sql',
+            True,
+            metadata[0]['PackageName'],
+            metadata[0]['ProjectName'],
+            metadata[0]['FolderName']
         )
     
     def get_package_info(self):
@@ -189,13 +203,18 @@ class monitor(object):
             )
         return result
 
-    def __execute_query(self, query_file, onerow, *args):
+    def __execute_dynamic_query(self, query_file, onerow, **args):        
+        template = Template(self.__read_sql_file(query_file))
+
+        return self.__execute_sql_query(
+            template.substitute(args),
+            onerow
+        )
+
+    def __execute_sql_query(self, query, onerow, *args):
         result = {}
-        file = open('dashboard/query/' + query_file, 'r')
-        query = file.read()
-        file.close()
         cnxn = pyodbc.connect(self.config.connectionString)
-        cursor = cnxn.cursor()
+        cursor = cnxn.cursor()        
         cursor.execute(query, args)
         if (onerow == False):
             rows = cursor.fetchall()
@@ -207,6 +226,25 @@ class monitor(object):
         cursor.close()
         
         return result
+
+    def __execute_query(self, query_file, onerow, *args):        
+        if args:        
+            return self.__execute_sql_query(
+                self.__read_sql_file(query_file), 
+                onerow, 
+                *args
+            )
+        else:
+            return self.__execute_sql_query(
+                self.__read_sql_file(query_file), 
+                onerow             
+            )
+
+    def __read_sql_file(self, query_file):
+        file = open('dashboard/query/' + query_file, 'r')
+        query = file.read()
+        file.close()
+        return query
 
     def __get_proper_execution_id(self, execution_id):
         result = 0    

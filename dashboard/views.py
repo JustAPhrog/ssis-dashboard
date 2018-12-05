@@ -226,8 +226,7 @@ def list_packages():
         }
     m = monitor()
     engine_info = m.get_engine_info()
-    ssispackages = m.get_ssis_packages_list()
-
+    ssispackages = m.get_ssis_packages_list(folders=app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None)
     return render_template(
         'packages.html',
         environment=environment,
@@ -239,7 +238,9 @@ def list_packages():
 def execute_package(package):
     parameter = request.form["parameter"]
     m = monitor()    
-    return f'Package {package}, paramters: {parameter}, result {m.get_ssis_package_metadata(package)}' 
+    metadata = m.get_ssis_package_metadata(package)
+
+    return f'Package {package}, paramters: {parameter}, job {metadata}'#' result {m.execute_ssis_package(metadata)}' 
 
 
 @app.errorhandler(404)
