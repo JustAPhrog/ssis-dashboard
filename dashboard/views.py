@@ -220,8 +220,9 @@ def package_history(folder_name, project_name, status, package_name):
 #def get_sample():
 #    return jsonify({'result': 123})
 
-@app.route('/list/packages')
-def list_packages():
+@app.route('/list/packages', defaults={'folder': None})
+@app.route('/list/packages/<folder>')
+def list_packages(folder):
     environment = {
         'version': version,
         'timestamp': datetime.now()        
@@ -230,8 +231,7 @@ def list_packages():
     m.status = 'running'
     m.config.executionCount = 5
     engine_info = m.get_engine_info()    
-    running_package_list = m.get_package_list()
-    ssispackages = m.get_ssis_packages_list(folders=app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None)
+    running_package_list = m.get_package_list()    
 
     m2 = monitor()
     m2.status = 'halted'
@@ -242,6 +242,11 @@ def list_packages():
     m3.status = 'succeeded'
     m3.config.executionCount = 5
     succeeded_package_list = m3.get_package_list()
+
+    if folder:
+        ssispackages = m.get_ssis_packages_list(folders=[folder])
+    else:
+        ssispackages = m.get_ssis_packages_list(folders=app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None)
 
     return render_template(
         'packages.html',
