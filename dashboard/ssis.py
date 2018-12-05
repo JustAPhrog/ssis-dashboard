@@ -1,6 +1,7 @@
 import pyodbc
 from string import Template
 from dashboard import app
+import json
 
 class configuration:
     pass
@@ -137,13 +138,15 @@ class monitor(object):
             package_id
         )
     
-    def execute_ssis_package(self, metadata):
+    def execute_ssis_package(self, package_id, *parameters):        
+        metadata = self.get_ssis_package_metadata(package_id)                
         return self.__execute_query(
             'ssis-package-execute.sql',
             True,
             metadata[0]['PackageName'],
             metadata[0]['ProjectName'],
-            metadata[0]['FolderName']
+            metadata[0]['FolderName'],
+            json.dumps(parameters)
         )
     
     def get_package_info(self):

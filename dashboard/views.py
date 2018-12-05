@@ -1,10 +1,12 @@
 from datetime import datetime
 import urllib.parse
-
+import json
 from flask import render_template
 from flask import make_response
 from flask import jsonify
 from flask import request
+from flask import redirect
+from flask import url_for
 from dashboard.ssis import monitor
 from dashboard import app
 
@@ -225,12 +227,27 @@ def list_packages():
         'timestamp': datetime.now()        
         }
     m = monitor()
-    engine_info = m.get_engine_info()
+    m.status = 'running'
+    m.config.executionCount = 5
+    engine_info = m.get_engine_info()    
+    running_package_list = m.get_package_list()
     ssispackages = m.get_ssis_packages_list(folders=app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None)
+
+    m2 = monitor()
+    m2.status = 'halted'
+    m2.config.executionCount = 5
+    halted_package_list = m2.get_package_list()
+
+    m3 = monitor()
+    m3.status = 'succeeded'
+    m3.config.executionCount = 5
+    succeeded_package_list = m3.get_package_list()
+
     return render_template(
         'packages.html',
         environment=environment,
         engine_info=engine_info,
+        package_list=running_package_list + halted_package_list + succeeded_package_list,
         ssispackages=ssispackages
     )
 
@@ -238,9 +255,8 @@ def list_packages():
 def execute_package(package):
     parameter = request.form["parameter"]
     m = monitor()    
-    metadata = m.get_ssis_package_metadata(package)
-
-    return f'Package {package}, paramters: {parameter}, job {metadata}'#' result {m.execute_ssis_package(metadata)}' 
+    #return f'Package {package}, paramters: {parameter}, result {m.execute_ssis_package(package, json.loads(parameter))}' 
+    return redirect(url_for('list_packages'))
 
 
 @app.errorhandler(404)
