@@ -27,6 +27,8 @@
     <!-- Morris Charts CSS -->
     <link href="/static/css/plugins/morris.css" rel="stylesheet">
 
+    {% block styles%} {%endblock%}
+
     {% if config['GOOGLE_ANALYTICS'] != None %}
     <!-- Google Analytics -->
     <script>
@@ -84,7 +86,7 @@
     <!-- DataTables JavaScript -->
     <script src="/static/js/plugins/dataTables/jquery.dataTables.js"></script>
     <script src="/static/js/plugins/dataTables/dataTables.bootstrap.js"></script>
-
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <!-- Custom Theme JavaScript -->
     <script src="/static/js/sb-admin-2.js"></script>
 

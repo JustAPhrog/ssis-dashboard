@@ -142,12 +142,20 @@ class monitor(object):
         metadata = self.get_ssis_package_metadata(package_id)                
         return self.__execute_query(
             'ssis-package-execute.sql',
-            True,
+            None
+            ,
             metadata[0]['PackageName'],
             metadata[0]['ProjectName'],
             metadata[0]['FolderName'],
             json.dumps(parameters)
         )
+    
+    def get_paramter_names(self):
+        return  [v["parameter_name"] for v in self.__execute_query(
+                'parameters.sql',
+                False
+                )]        
+    
     
     def get_package_info(self):
         result = self.__execute_query(
@@ -219,7 +227,10 @@ class monitor(object):
         cnxn = pyodbc.connect(self.config.connectionString)
         cursor = cnxn.cursor()        
         cursor.execute(query, args)
-        if (onerow == False):
+        if(onerow == None):
+            cnxn.commit()
+            return result            
+        elif (onerow == False):
             rows = cursor.fetchall()
             result = [dict(zip([cd[0] for cd in cursor.description], row)) for row in rows]
         else:

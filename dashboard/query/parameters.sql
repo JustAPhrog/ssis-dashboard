@@ -1,0 +1,1 @@
+SELECT DISTINCT(parameter_name) FROM SSISDB.internal.object_parameters;

@@ -260,8 +260,14 @@ def list_packages(folder):
 def execute_package(package):
     parameter = request.form["parameter"]
     m = monitor()    
-    #return f'Package {package}, paramters: {parameter}, result {m.execute_ssis_package(package, json.loads(parameter))}' 
+    m.execute_ssis_package(package, parameter) 
     return redirect(url_for('list_packages'))
+
+@app.route('/list/parameternames')
+def list_parameter_names():
+    m = monitor()
+    return json.dumps(m.get_paramter_names()), 200, {'Content-Type': 'application/json; charset=utf-8'}   
+
 
 
 @app.errorhandler(404)
