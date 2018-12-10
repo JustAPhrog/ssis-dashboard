@@ -223,36 +223,28 @@ def package_history(folder_name, project_name, status, package_name):
 @app.route('/list/packages', defaults={'folder': None})
 @app.route('/list/packages/<folder>')
 def list_packages(folder):
-    environment = {
-        'version': version,
-        'timestamp': datetime.now()        
-        }
-    m = monitor()
-    m.status = 'running'
-    m.config.executionCount = 5
-    engine_info = m.get_engine_info()    
-    running_package_list = m.get_package_list()    
-
-    m2 = monitor()
-    m2.status = 'halted'
-    m2.config.executionCount = 5
-    halted_package_list = m2.get_package_list()
-
-    m3 = monitor()
-    m3.status = 'succeeded'
-    m3.config.executionCount = 5
-    succeeded_package_list = m3.get_package_list()
+    
+    configFolders = app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None
+    running = monitor()    
+    running.folder_name = folder if folder is not None else next(iter(configFolders or []), None)
+    running.folder_name = monitor.all if running.folder_name is None else running.folder_name
+    running.config.executionCount = 15
+    engine_info = running.get_engine_info()    
+    running_package_list = running.get_package_list()    
 
     if folder:
-        ssispackages = m.get_ssis_packages_list(folders=[folder])
+        ssispackages = running.get_ssis_packages_list(folders=[folder])
     else:
-        ssispackages = m.get_ssis_packages_list(folders=app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None)
+        ssispackages = running.get_ssis_packages_list(folders=configFolders)
 
     return render_template(
         'packages.html',
-        environment=environment,
+        environment={
+            'version': version,
+            'timestamp': datetime.now()        
+        },
         engine_info=engine_info,
-        package_list=running_package_list + halted_package_list + succeeded_package_list,
+        package_list=running_package_list,
         ssispackages=ssispackages
     )
 
