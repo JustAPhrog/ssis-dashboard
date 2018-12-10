@@ -144,10 +144,10 @@ class monitor(object):
             'ssis-package-execute.sql',
             None
             ,
-            metadata[0]['PackageName'],
-            metadata[0]['ProjectName'],
             metadata[0]['FolderName'],
-            json.dumps(parameters)
+            metadata[0]['ProjectName'],
+            metadata[0]['PackageName'],
+            *parameters
         )
     
     def get_paramter_names(self):
