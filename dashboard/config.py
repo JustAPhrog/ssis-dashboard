@@ -20,3 +20,6 @@ HOUR_SPAN = 360
 
 # How many of the past executions should we show on the dashboard?
 EXECUTION_COUNT=1000
+
+# Default SSIS folder
+DEFAULT_SSIS_FOLDERS=None
