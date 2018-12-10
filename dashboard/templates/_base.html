@@ -90,9 +90,6 @@
     <!-- Custom Theme JavaScript -->
     <script src="/static/js/sb-admin-2.js"></script>
 
-    <!-- Page-Specific JavaScript -->
-    {% block pagejs %}{% endblock %}
-
     <script lang="JavaScript">
 
     var timeOut;
@@ -110,10 +107,10 @@
             clearTimeout(timeOut);
             timeOut = reloadPage();
         });
-    });
-
-
+    });    
 
     </script>
+    <!-- Page-Specific JavaScript -->
+    {% block pagejs %}{% endblock %}
 </body>
 </html>
