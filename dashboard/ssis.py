@@ -123,7 +123,7 @@ class monitor(object):
 
     def get_ssis_packages_list(self, folders=None):
         where_clause = '\',\''.join(folders) if folders is not None  else None
-        where_clause = f' IN (\'{where_clause}\')' if folders is not None else 'LIKE \'%\''
+        where_clause = ' IN (\'{}\')'.format(where_clause) if folders is not None else 'LIKE \'%\''
         return self.__execute_dynamic_query(
             'ssis-packages-list.sql',            
             False,
