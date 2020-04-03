@@ -13,8 +13,8 @@
         <div class="navbar-collapse collapse">
 
             <!-- Left nav -->
-            <ul class="nav navbar-nav">
-                <li>
+            <ul class="nav navbar-nav">                
+                <li>                    
                     <a href="/">{{ engine_info.server_name}} <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         {% for f in engine_folders %}
@@ -30,7 +30,15 @@
                         </li>
                         {% endfor %}
                     </ul>
+                </li>                
+            </ul>
+
+            <ul class="nav navbar-nav">
+                {% for server in servers %}
+                <li>                    
+                    <a href="{{ url_for('packages', server_name=server) }}">{{ server }}</a>                    
                 </li>
+                {% endfor %}
             </ul>
 
             <!-- Right nav -->

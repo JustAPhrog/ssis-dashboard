@@ -44,12 +44,12 @@ class monitor(object):
     status =  all
     execution_id = all
 
-    def __init__(self):
+    def __init__(self, server="main"):
         self.config = configuration()
         self.config.hourSpan = app.config["HOUR_SPAN"]
         self.config.asOfDate = app.config["AS_OF_DATE"]
         self.config.executionCount = app.config["EXECUTION_COUNT"]
-        self.config.connectionString = app.config["CONNECTION_STRING"]["main"]
+        self.config.connectionString = app.config["CONNECTION_STRING"][server]
 
     def get_engine_info(self):
         result = self.__execute_query('engine-info.sql', True)
