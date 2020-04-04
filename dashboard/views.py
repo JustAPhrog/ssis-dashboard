@@ -48,7 +48,7 @@ def packages(server_name, folder_name=monitor.all, project_name=monitor.all, sta
     package_list = m.get_package_list()
     package_executables = m.get_package_executables()
     package_children = m.get_package_children()
-    servers = app.config["CONNECTION_STRING"].keys()
+    servers = sorted(app.config["CONNECTION_STRING"].keys())
 
     return render_template(
         'index.html',
@@ -68,8 +68,10 @@ def packages(server_name, folder_name=monitor.all, project_name=monitor.all, sta
     )
 
 @app.route('/server/<server_name>/folder/<folder_name>/project/<project_name>/status/<status>')
-@app.route('/folder/<folder_name>/project/<project_name>/status/<status>', defaults={'server_name': None})
-def folder_project_status(server_name,folder_name, project_name, status):
+@app.route('/server/<server_name>/folder/<folder_name>/status/<status>')
+@app.route('/server/<server_name>/folder/<folder_name>')
+@app.route('/folder/<folder_name>/project/<project_name>/status/<status>')
+def folder_project_status(server_name=None,folder_name=monitor.all, project_name=monitor.all, status=monitor.all):
     return packages(server_name=server_name,folder_name=folder_name, project_name=project_name, status=status)
 
 @app.route('/server/<server_name>/folder/<folder_name>/project/<project_name>')
@@ -180,8 +182,8 @@ def package_execution_values(server_name, execution_id):
     )
 
 @app.route('/server/<server_name>/history/<folder_name>/project/<project_name>/status/<status>/package/<package_name>')
-@app.route('/history/<folder_name>/project/<project_name>/status/<status>/package/<package_name>', defaults={'server_name': None})
-def package_history(server_name, folder_name, project_name, status, package_name):
+@app.route('/history/<folder_name>/project/<project_name>/status/<status>/package/<package_name>')
+def package_history(server_name=None, folder_name=monitor.all, project_name=monitor.all, status=monitor.all, package_name=monitor.all):
     server_name =  urllib.parse.unquote(server_name) if server_name is not None else [*app.config["CONNECTION_STRING"].keys()][0]
     folder_name = urllib.parse.unquote(folder_name)
     project_name = urllib.parse.unquote(project_name)
@@ -241,8 +243,9 @@ def package_history(server_name, folder_name, project_name, status, package_name
 #    return jsonify({'result': 123})
 
 @app.route('/server/<server_name>/list/packages/<folder>')
-@app.route('/list/packages', defaults={'folder': None, 'server_name': None})
-def list_packages(server_name, folder):
+@app.route('/server/<server_name>/list/packages')
+@app.route('/list/packages')
+def list_packages(server_name=None, folder=None):
     
     configFolders = app.config["DEFAULT_SSIS_FOLDERS"] if "DEFAULT_SSIS_FOLDERS" in app.config else None
     server_name =  urllib.parse.unquote(server_name) if server_name is not None else [*app.config["CONNECTION_STRING"].keys()][0]
@@ -262,11 +265,14 @@ def list_packages(server_name, folder):
         'packages.html',
         environment={
             'version': version,
-            'timestamp': datetime.now()        
+            'timestamp': datetime.now(),        
+            'folder_name': running.folder_name
         },
         engine_info=engine_info,
         package_list=running_package_list,
-        ssispackages=ssispackages
+        ssispackages=ssispackages,
+        servers=app.config["CONNECTION_STRING"].keys(),
+        server_name=server_name
     )
 
 @app.route('/server/<server_name>/execute/<int:package>', methods=['POST'])
@@ -288,10 +294,8 @@ def list_parameter_names(server_name):
 
 
 @app.errorhandler(404)
-def not_found(error):
-    server_name =  urllib.parse.unquote(server_name) if server_name is not None else [*app.config["CONNECTION_STRING"].keys()][0]
-    m = monitor(server_name) if server_name is not None else monitor()
-
+def not_found(error):    
+    m = monitor()
     engine_info = m.get_engine_info()
 
     environment = {
