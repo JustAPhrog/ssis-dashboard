@@ -207,7 +207,8 @@ def package_history(server_name=None, folder_name=monitor.all, project_name=moni
     engine_info = m.get_engine_info()
     package_info = m.get_package_info()
     package_kpi = m.get_package_kpi()
-    package_history = m.get_package_history()
+    package_history = m.get_package_history()    
+    servers = sorted(app.config["CONNECTION_STRING"].keys())
 
     return render_template(
         'execution-history.html',
@@ -215,7 +216,9 @@ def package_history(server_name=None, folder_name=monitor.all, project_name=moni
         engine_info=engine_info,
         package_info=package_info,
         package_kpi=package_kpi,
-        package_history=package_history
+        package_history=package_history,
+        servers=servers,
+        server_name=server_name
     )
 
 #@app.route('/ssis/execution-status', methods = ['GET'])
