@@ -107,7 +107,7 @@ def execution(server_name, execution_id=0):
     package_list = m.get_package_list()
     package_executables = m.get_package_executables()
     package_children = m.get_package_children()
-
+    servers =  servers = sorted(app.config["CONNECTION_STRING"].keys())
     return render_template(
         'execution-details.html',
         environment=environment,
@@ -120,7 +120,9 @@ def execution(server_name, execution_id=0):
         package_kpi=package_kpi,
         package_list=package_list,
         package_children=package_children,
-        package_executables=package_executables
+        package_executables=package_executables,
+        servers=servers,
+        server_name=server_name
     )
 
 @app.route('/server/<server_name>/execution/<int:execution_id>/events/<event_type>')
@@ -142,14 +144,16 @@ def package_events(server_name, execution_id, event_type):
     package_info = m.get_package_info()
     package_kpi = m.get_package_kpi()
     package_events = m.get_package_events(event_type)
-
+    servers =  servers = sorted(app.config["CONNECTION_STRING"].keys())
     return render_template(
         'execution-events.html',
         environment=environment,
         engine_info=engine_info,
         package_info=package_info,
         package_kpi=package_kpi,
-        package_events=package_events
+        package_events=package_events,
+        servers=servers,
+        server_name=server_name
     )
 
 @app.route('/server/<server_name>/execution/<int:execution_id>/values')
@@ -170,6 +174,7 @@ def package_execution_values(server_name, execution_id):
     package_kpi = m.get_package_kpi()
     package_parameters = m.get_package_details("execution-values")
     package_overrides = m.get_package_details("execution-overrides")
+    servers =  servers = sorted(app.config["CONNECTION_STRING"].keys())
 
     return render_template(
         'execution-values.html',
@@ -178,7 +183,9 @@ def package_execution_values(server_name, execution_id):
         package_info=package_info,
         package_kpi=package_kpi,
         package_parameters=package_parameters,
-        package_overrides=package_overrides
+        package_overrides=package_overrides,
+        servers=servers,
+        server_name=server_name
     )
 
 @app.route('/server/<server_name>/history/<folder_name>/project/<project_name>/status/<status>/package/<package_name>')
