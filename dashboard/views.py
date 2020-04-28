@@ -292,7 +292,7 @@ def execute_package(server_name, package):
     parameter = request.form["parameter"]
     m = monitor(server_name) if server_name is not None else monitor()
     m.execute_ssis_package(package, parameter) 
-    return redirect(url_for('list_packages'))
+    return redirect(url_for('list_packages', server_name=server_name))
 
 @app.route('/server/<server_name>/list/parameternames')
 @app.route('/list/parameternames', defaults={'server_name': None})

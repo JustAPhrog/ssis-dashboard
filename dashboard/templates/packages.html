@@ -43,7 +43,7 @@
                             <td class="text-center">{{ p.package_id }}</td>
                             <td class="package">{{ p.name }}</td>
                             <td class="parameter">
-                                <form action="/execute/{{p.package_id}}" method="POST">
+                                <form action="{{url_for('execute_package', server_name=server_name, package=p.package_id)}}" method="POST">
                                     <textarea name="parameter"></textarea>
                                 </form>
                             </td>
@@ -117,7 +117,7 @@
             var availableTags = [];
             $.ajax({
             type: 'GET',
-            url: '/list/parameternames',            
+            url: "{{url_for('list_parameter_names', server_name=server_name)}}",            
             dataType: 'json',
             cache: false,
             success: function(result) {
