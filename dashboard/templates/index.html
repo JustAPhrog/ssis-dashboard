@@ -63,10 +63,10 @@
                         {% else %}
                     <tr class="info">
                         {% endif %}
-                        <td class="text-center"><a href="{{ url_for('execution', execution_id = p.execution_id) }}">{{ p.execution_id }}</a></td>
-                        <td class="text-center"><!--<a href="#" title="Dataflow Information"><i class="fa fa-bar-chart"></i></a>--><a href="{{ url_for('package_execution_values', execution_id = p.execution_id) }}" title="Execution Values"><i class="fa fa-magic"></i></a></td>
-                        <td><a href="{{ url_for('folder_project_status', folder_name = environment['folder_name'], project_name = p.project_name, status = environment['status']) }}">{{ p.project_name }}</a> (v.{{ p.project_lsn }})</td>
-                        <td><a href="{{ url_for('package_history', folder_name = environment['folder_name'], project_name = environment['project_name'], status = environment['status'], package_name = p.package_name) }}">{{ p.package_name }}</a></td>
+                        <td class="text-center"><a href="{{ url_for('execution', server_name = server_name, execution_id = p.execution_id) }}">{{ p.execution_id }}</a></td>
+                        <td class="text-center"><!--<a href="#" title="Dataflow Information"><i class="fa fa-bar-chart"></i></a>--><a href="{{ url_for('package_execution_values', server_name = server_name, execution_id = p.execution_id) }}" title="Execution Values"><i class="fa fa-magic"></i></a></td>
+                        <td><a href="{{ url_for('folder_project_status', server_name = server_name, folder_name = environment['folder_name'], project_name = p.project_name, status = environment['status']) }}">{{ p.project_name }}</a> (v.{{ p.project_lsn }})</td>
+                        <td><a href="{{ url_for('package_history', server_name = server_name, folder_name = environment['folder_name'], project_name = environment['project_name'], status = environment['status'], package_name = p.package_name) }}">{{ p.package_name }}</a></td>
                         <td>{{ p.environment }}</td>
                         <td><span class="label label-{{ package_status_class(p.status) }}">{{ p.status_desc }}</span></td>
                         <td>{{ p.start_time }}</td>

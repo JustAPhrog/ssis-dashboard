@@ -1,5 +1,7 @@
 import pyodbc
+from string import Template
 from dashboard import app
+import json
 
 class configuration:
     pass
@@ -42,12 +44,12 @@ class monitor(object):
     status =  all
     execution_id = all
 
-    def __init__(self):
+    def __init__(self, server=None):
         self.config = configuration()
         self.config.hourSpan = app.config["HOUR_SPAN"]
         self.config.asOfDate = app.config["AS_OF_DATE"]
         self.config.executionCount = app.config["EXECUTION_COUNT"]
-        self.config.connectionString = app.config["CONNECTION_STRING"]["main"]
+        self.config.connectionString = app.config["CONNECTION_STRING"][server] if server is not None else  [*app.config["CONNECTION_STRING"].keys()][0]
 
     def get_engine_info(self):
         result = self.__execute_query('engine-info.sql', True)
@@ -118,6 +120,42 @@ class monitor(object):
             r["logging_level_desc"] = self.logging_codes[r["logging_level"]].title()
 
         return result
+
+    def get_ssis_packages_list(self, folders=None):
+        where_clause = '\',\''.join(folders) if folders is not None  else None
+        where_clause = ' IN (\'{}\')'.format(where_clause) if folders is not None else 'LIKE \'%\''
+        return self.__execute_dynamic_query(
+            'ssis-packages-list.sql',            
+            False,
+            clause=where_clause
+        )
+
+    def get_ssis_package_metadata(self, package_id):
+        print(package_id)
+        return self.__execute_query(
+            'ssis-package-metadata.sql',
+            False,
+            package_id
+        )
+    
+    def execute_ssis_package(self, package_id, *parameters):        
+        metadata = self.get_ssis_package_metadata(package_id)                
+        return self.__execute_query(
+            'ssis-package-execute.sql',
+            None
+            ,
+            metadata[0]['FolderName'],
+            metadata[0]['ProjectName'],
+            metadata[0]['PackageName'],
+            *parameters
+        )
+    
+    def get_paramter_names(self):
+        return  [v["parameter_name"] for v in self.__execute_query(
+                'parameters.sql',
+                False
+                )]        
+    
     
     def get_package_info(self):
         result = self.__execute_query(
@@ -176,15 +214,23 @@ class monitor(object):
             )
         return result
 
-    def __execute_query(self, query_file, onerow, *args):
+    def __execute_dynamic_query(self, query_file, onerow, **args):        
+        template = Template(self.__read_sql_file(query_file))
+
+        return self.__execute_sql_query(
+            template.substitute(args),
+            onerow
+        )
+
+    def __execute_sql_query(self, query, onerow, *args):
         result = {}
-        file = open('dashboard/query/' + query_file, 'r')
-        query = file.read()
-        file.close()
         cnxn = pyodbc.connect(self.config.connectionString)
-        cursor = cnxn.cursor()
+        cursor = cnxn.cursor()        
         cursor.execute(query, args)
-        if (onerow == False):
+        if(onerow == None):
+            cnxn.commit()
+            return result            
+        elif (onerow == False):
             rows = cursor.fetchall()
             result = [dict(zip([cd[0] for cd in cursor.description], row)) for row in rows]
         else:
@@ -194,6 +240,25 @@ class monitor(object):
         cursor.close()
         
         return result
+
+    def __execute_query(self, query_file, onerow, *args):        
+        if args:        
+            return self.__execute_sql_query(
+                self.__read_sql_file(query_file), 
+                onerow, 
+                *args
+            )
+        else:
+            return self.__execute_sql_query(
+                self.__read_sql_file(query_file), 
+                onerow             
+            )
+
+    def __read_sql_file(self, query_file):
+        file = open('dashboard/query/' + query_file, 'r')
+        query = file.read()
+        file.close()
+        return query
 
     def __get_proper_execution_id(self, execution_id):
         result = 0    
